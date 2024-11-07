@@ -1,4 +1,4 @@
-CREATE TABLE "user" (
+CREATE TABLE "users" (
   "id" BIGSERIAL PRIMARY KEY,
   "username" varchar UNIQUE NOT NULL,
   "email" varchar UNIQUE NOT NULL,
@@ -15,4 +15,4 @@ CREATE TABLE "snippets" (
   "updated_at" timestamp DEFAULT (now())
 );
 
-ALTER TABLE "snippets" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id");
+ALTER TABLE "snippets" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
