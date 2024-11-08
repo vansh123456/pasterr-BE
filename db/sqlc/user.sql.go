@@ -49,14 +49,14 @@ func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
 	return err
 }
 
-const getUserbyId = `-- name: GetUserbyId :one
+const getUserById = `-- name: GetUserById :one
 SELECT id, username, email, password, created_at, updated_at FROM users
  WHERE id = $1
  LIMIT 1
 `
 
-func (q *Queries) GetUserbyId(ctx context.Context, id int64) (User, error) {
-	row := q.db.QueryRowContext(ctx, getUserbyId, id)
+func (q *Queries) GetUserById(ctx context.Context, id int64) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserById, id)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -67,6 +67,41 @@ func (q *Queries) GetUserbyId(ctx context.Context, id int64) (User, error) {
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const listUsers = `-- name: ListUsers :many
+SELECT id, username, email, password, created_at, updated_at FROM users
+ORDER BY id
+`
+
+func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
+	rows, err := q.db.QueryContext(ctx, listUsers)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Username,
+			&i.Email,
+			&i.Password,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const updateUserEmail = `-- name: UpdateUserEmail :exec
