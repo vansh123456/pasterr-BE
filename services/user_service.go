@@ -70,9 +70,9 @@ func SigninHandler(c *gin.Context, dbConn *sql.DB) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
 	}
 	fmt.Println("jwt token at time of login handler called", token)
-	//c.JSON(http.StatusOK, gin.H{"token": token})
-	c.Header("Authorization", "Bearer "+token)
-	c.JSON(http.StatusOK, gin.H{"message": "Login successful"})
+	c.JSON(http.StatusOK, gin.H{"token": token})
+	// c.Header("Authorization", "Bearer "+token)
+	// c.JSON(http.StatusOK, gin.H{"message": "Login successful"})
 }
 
 func ListUsersHandler(c *gin.Context, dbConn *sql.DB) {
