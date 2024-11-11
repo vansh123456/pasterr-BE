@@ -1,7 +1,6 @@
 package services
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -28,7 +27,6 @@ func GenerateJWTToken(userID uint) (string, error) {
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	fmt.Println("jwtkey", token.SignedString(jwtKey))
 	return token.SignedString(jwtKey)
 }
 

@@ -13,6 +13,9 @@ func InitializeRouter(router *gin.Engine, dbConn *sql.DB) {
 	router.POST("/signup", func(c *gin.Context) {
 		services.SignupHandler(c, dbConn)
 	})
+	router.POST("/signin", func(c *gin.Context) {
+		services.SigninHandler(c, dbConn)
+	})
 	router.GET("/users", func(c *gin.Context) {
 		services.ListUsersHandler(c, dbConn)
 	})
