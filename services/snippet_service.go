@@ -2,7 +2,6 @@ package services
 
 import (
 	"database/sql"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -23,7 +22,6 @@ func CreateSnippetHandler(c *gin.Context, dbConn *sql.DB) {
 		return
 	}
 	params.UserID = int32(userID.(uint)) //UserID in the sqlc params is in int32 so we are converting it to int32 explicitely
-	fmt.Println(params)
 	queries := db.New(dbConn)
 	snippet, err := queries.CreateSnippet(c.Request.Context(), params)
 	if err != nil {

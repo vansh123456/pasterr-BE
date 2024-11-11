@@ -25,22 +25,20 @@ func InitializeRouter(router *gin.Engine, dbConn *sql.DB) {
 	//localhost/snippets/:id
 	snippets := router.Group("/snippets", middleware.AuthMiddleware())
 	{
-		router.POST("/createsnippets", func(c *gin.Context) {
+		snippets.POST("", func(c *gin.Context) { // POST /snippets
 			services.CreateSnippetHandler(c, dbConn)
 		})
-		snippets.GET("", func(c *gin.Context) {
+		snippets.GET("", func(c *gin.Context) { // GET /snippets
 			services.ListSnippetsHandler(c, dbConn)
 		})
-		snippets.GET("/:id", func(c *gin.Context) {
+		snippets.GET("/:id", func(c *gin.Context) { // GET /snippets/:id
 			services.GetSnippetByIDHandler(c, dbConn)
 		})
-		snippets.PUT("/:id", func(c *gin.Context) {
+		snippets.PUT("/:id", func(c *gin.Context) { // PUT /snippets/:id
 			services.UpdateSnippetContent(c, dbConn)
 		})
-		snippets.DELETE("/:id", func(c *gin.Context) {
+		snippets.DELETE("/:id", func(c *gin.Context) { // DELETE /snippets/:id
 			services.DeleteSnippetHandler(c, dbConn)
 		})
-
 	}
-
 }

@@ -1,20 +1,17 @@
 package services
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
 )
 
-const (
-	jwtsecret = "hellobsdk"
-)
-
-var jwtKey = []byte(jwtsecret)
+var jwtKey = []byte("heyheybsdk")
 
 type Claims struct {
-	UserID               uint `json: "user_id"`
-	jwt.RegisteredClaims      //jwt internal function
+	UserID uint `json:"user_id"` // Corrected json tag
+	jwt.RegisteredClaims
 }
 
 // generate jWT token for given userID
@@ -31,12 +28,25 @@ func GenerateJWTToken(userID uint) (string, error) {
 }
 
 func ParseJWT(tokenStr string) (*Claims, error) {
+	fmt.Println("Parsing JWT:", tokenStr) // Add more debug prints
 	claims := &Claims{}
 	token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
+		// Ensure that the signing method is correct
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
 		return jwtKey, nil
 	})
-	if err != nil || !token.Valid {
+
+	if err != nil {
+		fmt.Println("Error parsing token:", err) // Print specific error
 		return nil, err
 	}
+
+	if !token.Valid {
+		fmt.Println("Token is not valid")
+		return nil, fmt.Errorf("invalid token")
+	}
+
 	return claims, nil
 }
