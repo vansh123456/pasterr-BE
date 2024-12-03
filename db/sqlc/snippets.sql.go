@@ -105,14 +105,14 @@ func (q *Queries) ListSnippets(ctx context.Context, arg ListSnippetsParams) ([]S
 	return items, nil
 }
 
-const listSnippetsByUser = `-- name: ListSnippetsByUser :many
+const listSnippetsByUserID = `-- name: ListSnippetsByUserID :many
 SELECT id, content, user_id, created_at, updated_at FROM snippets 
 WHERE user_id = $1
 ORDER BY created_at DESC
 `
 
-func (q *Queries) ListSnippetsByUser(ctx context.Context, userID int32) ([]Snippet, error) {
-	rows, err := q.db.QueryContext(ctx, listSnippetsByUser, userID)
+func (q *Queries) ListSnippetsByUserID(ctx context.Context, userID int32) ([]Snippet, error) {
+	rows, err := q.db.QueryContext(ctx, listSnippetsByUserID, userID)
 	if err != nil {
 		return nil, err
 	}

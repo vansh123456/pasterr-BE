@@ -43,12 +43,24 @@ func SignupHandler(c *gin.Context, dbConn *sql.DB) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 		return
 	}
-	c.JSON(http.StatusOK, user)
+	// Generate JWT token
+	token, err := GenerateJWTToken(uint(user.ID))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		return
+	}
+
+	// Return the user details and token
+	c.JSON(http.StatusOK, gin.H{
+		"user":  user,
+		"token": token,
+	})
+	fmt.Print("jwt token:" + token)
 }
 
 func SigninHandler(c *gin.Context, dbConn *sql.DB) {
 	var req struct { //this struct defines the JSON res body that the server expects
-		Username string `json:"username"`
+		Email    string `json:"email"`
 		Password string `json:"password"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -56,7 +68,7 @@ func SigninHandler(c *gin.Context, dbConn *sql.DB) {
 		return
 	}
 	queries := db.New(dbConn)
-	user, err := queries.GetUserByUsername(c.Request.Context(), req.Username)
+	user, err := queries.GetUserByEmail(c.Request.Context(), req.Email)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
 		return
@@ -70,7 +82,14 @@ func SigninHandler(c *gin.Context, dbConn *sql.DB) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
 	}
 	fmt.Println("jwt token at time of login handler called", token)
-	c.JSON(http.StatusOK, gin.H{"token": token})
+	c.JSON(http.StatusOK, gin.H{
+		"token": token,
+		"user": gin.H{
+			"id":       user.ID,
+			"username": user.Username,
+			"email":    user.Email,
+		},
+	})
 	// c.Header("Authorization", "Bearer "+token)
 	// c.JSON(http.StatusOK, gin.H{"message": "Login successful"})
 }

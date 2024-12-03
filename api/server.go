@@ -2,7 +2,9 @@ package api
 
 import (
 	"database/sql"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/vansh123456/pasterr/middleware"
 	"github.com/vansh123456/pasterr/services"
@@ -10,6 +12,15 @@ import (
 
 // what we were doing in store.db,usko abstraction layer banake we used to connect with that,but we havent used that for simple CRUD functions so we are defining it here
 func InitializeRouter(router *gin.Engine, dbConn *sql.DB) {
+
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:5173"}, // Change this to your frontend's origin
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
 	router.POST("/signup", func(c *gin.Context) {
 		services.SignupHandler(c, dbConn)

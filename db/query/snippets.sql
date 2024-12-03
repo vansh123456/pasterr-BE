@@ -16,7 +16,7 @@ ORDER BY created_at DESC
 LIMIT $1
 OFFSET $2;
 
--- name: ListSnippetsByUser :many
+-- name: ListSnippetsByUserID :many
 SELECT * FROM snippets 
 WHERE user_id = $1
 ORDER BY created_at DESC;
