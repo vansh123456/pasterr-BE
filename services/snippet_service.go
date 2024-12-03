@@ -32,8 +32,14 @@ func CreateSnippetHandler(c *gin.Context, dbConn *sql.DB) {
 }
 
 func ListSnippetsHandler(c *gin.Context, dbConn *sql.DB) {
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
 	queries := db.New(dbConn)
-	snippets, err := queries.ListSnippets(c.Request.Context())
+	snippets, err := queries.ListSnippetsByUserID(c.Request.Context(), int32(userID.(uint)))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve snippets"})
 		return
