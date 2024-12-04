@@ -7,24 +7,24 @@ INSERT INTO snippets(content,
 
 -- name: GetSnippetByID :one
 SELECT * FROM snippets 
-WHERE id = $1
-LIMIT 1;
+WHERE id = $1;
 
 -- name: ListSnippets :many
 SELECT * FROM snippets
-ORDER BY created_at DESC
-LIMIT $1
-OFFSET $2;
-
--- name: ListSnippetsByUserID :many
-SELECT * FROM snippets 
-WHERE user_id = $1
 ORDER BY created_at DESC;
 
--- name: UpdateSnippetContent :exec
+
+-- name: ListSnippetsByUserID :many
+SELECT id, content, user_id, created_at, updated_at
+FROM snippets
+WHERE user_id = $1;
+
+
+-- name: UpdateSnippetContent :one
 UPDATE snippets
-SET content = $1, updated_at = now()
-WHERE id = $2;
+SET content = $2, updated_at = now()
+WHERE id = $1
+RETURNING *;
 
 -- name: DeleteSnippet :exec
 DELETE FROM snippets

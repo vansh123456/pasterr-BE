@@ -48,7 +48,6 @@ func (q *Queries) DeleteSnippet(ctx context.Context, id int64) error {
 const getSnippetByID = `-- name: GetSnippetByID :one
 SELECT id, content, user_id, created_at, updated_at FROM snippets 
 WHERE id = $1
-LIMIT 1
 `
 
 func (q *Queries) GetSnippetByID(ctx context.Context, id int64) (Snippet, error) {
@@ -67,17 +66,10 @@ func (q *Queries) GetSnippetByID(ctx context.Context, id int64) (Snippet, error)
 const listSnippets = `-- name: ListSnippets :many
 SELECT id, content, user_id, created_at, updated_at FROM snippets
 ORDER BY created_at DESC
-LIMIT $1
-OFFSET $2
 `
 
-type ListSnippetsParams struct {
-	Limit  int32
-	Offset int32
-}
-
-func (q *Queries) ListSnippets(ctx context.Context, arg ListSnippetsParams) ([]Snippet, error) {
-	rows, err := q.db.QueryContext(ctx, listSnippets, arg.Limit, arg.Offset)
+func (q *Queries) ListSnippets(ctx context.Context) ([]Snippet, error) {
+	rows, err := q.db.QueryContext(ctx, listSnippets)
 	if err != nil {
 		return nil, err
 	}
@@ -106,9 +98,9 @@ func (q *Queries) ListSnippets(ctx context.Context, arg ListSnippetsParams) ([]S
 }
 
 const listSnippetsByUserID = `-- name: ListSnippetsByUserID :many
-SELECT id, content, user_id, created_at, updated_at FROM snippets 
+SELECT id, content, user_id, created_at, updated_at
+FROM snippets
 WHERE user_id = $1
-ORDER BY created_at DESC
 `
 
 func (q *Queries) ListSnippetsByUserID(ctx context.Context, userID int32) ([]Snippet, error) {
@@ -140,18 +132,27 @@ func (q *Queries) ListSnippetsByUserID(ctx context.Context, userID int32) ([]Sni
 	return items, nil
 }
 
-const updateSnippetContent = `-- name: UpdateSnippetContent :exec
+const updateSnippetContent = `-- name: UpdateSnippetContent :one
 UPDATE snippets
-SET content = $1, updated_at = now()
-WHERE id = $2
+SET content = $2, updated_at = now()
+WHERE id = $1
+RETURNING id, content, user_id, created_at, updated_at
 `
 
 type UpdateSnippetContentParams struct {
-	Content string
 	ID      int64
+	Content string
 }
 
-func (q *Queries) UpdateSnippetContent(ctx context.Context, arg UpdateSnippetContentParams) error {
-	_, err := q.db.ExecContext(ctx, updateSnippetContent, arg.Content, arg.ID)
-	return err
+func (q *Queries) UpdateSnippetContent(ctx context.Context, arg UpdateSnippetContentParams) (Snippet, error) {
+	row := q.db.QueryRowContext(ctx, updateSnippetContent, arg.ID, arg.Content)
+	var i Snippet
+	err := row.Scan(
+		&i.ID,
+		&i.Content,
+		&i.UserID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
